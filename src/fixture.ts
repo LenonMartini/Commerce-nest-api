@@ -10,7 +10,7 @@ async function bootstrap() {
   const dataSource = app.get<DataSource>(getDataSourceToken());
   await dataSource.synchronize(true); // cuidado: isso apaga e recria tabelas se for true
 
-  const productRepo = dataSource.getRepository('product');
+  const productRepo = dataSource.getRepository('Product');
 
   await productRepo.insert([
     {
@@ -85,6 +85,6 @@ async function bootstrap() {
     },
   ]);
 
-  console.log('Produtos inseridos com sucesso!');
+  await app.close();
 }
 bootstrap();
