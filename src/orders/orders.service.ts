@@ -1,19 +1,55 @@
 import { Injectable } from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { In, Repository } from 'typeorm';
+import { Order } from './entities/order.entity';
+import { Product } from 'src/products/entities/product.entity';
 
 
 @Injectable()
 export class OrdersService {
-  create(createOrderDto: CreateOrderDto) {
-    return 'This action adds a new order';
+
+  constructor(
+    @InjectRepository(Order) private readonly orderRepo: Repository<Order>,
+    @InjectRepository(Product) private readonly productRepo: Repository<Product>,
+  ){}
+
+  async create(createOrderDto: CreateOrderDto) {
+    const productIds = createOrderDto.items.map(item => item.product_id);
+    const uniqueProductIds = [...new Set(productIds)];
+
+    const products = await this.productRepo.findBy({ 
+      id: In(uniqueProductIds),
+    });
+
+    if(products.length !== uniqueProductIds.length){
+      throw new Error(`Algum produto não existe. Produtos passados ${productIds}, produtos encontrados ${products.map(product => product.id)}`);
+    }
+    const items = createOrderDto.items.map(item => {
+      const product = products.find(product => product.id === item.product_id);
+      return {
+        product,
+        quantity: item.quantity,
+        price: product.price,
+      };
+    });
+
+    const order = this.orderRepo.create({
+      client_id: 1,
+      items
+     
+    });
+    await this.orderRepo.save(order);
+    
+    return order;
   }
 
   findAll() {
-    return `This action returns all orders`;
+    return this.orderRepo.find();
   }
 
   findOne(id: number) {
-    return `This action returns a #${id} order`;
+    return `Parado 11:34:09`;
   }
 
 

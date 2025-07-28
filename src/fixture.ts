@@ -2,6 +2,8 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { getDataSourceToken } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
+import { Product } from './products/entities/product.entity';
+
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -10,7 +12,7 @@ async function bootstrap() {
   const dataSource = app.get<DataSource>(getDataSourceToken());
   await dataSource.synchronize(true); // cuidado: isso apaga e recria tabelas se for true
 
-  const productRepo = dataSource.getRepository('Product');
+  const productRepo = dataSource.getRepository(Product);
 
   await productRepo.insert([
     {
@@ -87,4 +89,5 @@ async function bootstrap() {
 
   await app.close();
 }
+
 bootstrap();
