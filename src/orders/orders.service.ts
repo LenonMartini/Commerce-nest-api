@@ -25,20 +25,26 @@ export class OrdersService {
     if(products.length !== uniqueProductIds.length){
       throw new Error(`Algum produto não existe. Produtos passados ${productIds}, produtos encontrados ${products.map(product => product.id)}`);
     }
-    const items = createOrderDto.items.map(item => {
-      const product = products.find(product => product.id === item.product_id);
+    const items = createOrderDto.items.map((item) => {
+      const product = products.find(
+        (product) => product.id === item.product_id,
+      );
       return {
-        product,
-        quantity: item.quantity,
+
         price: product.price,
+        product_id: item.product_id,
+        quantity: item.quantity,
+       
       };
     });
+    
 
-    const order = this.orderRepo.create({
+    const order = Order.create({
       client_id: 1,
       items
      
     });
+   
     await this.orderRepo.save(order);
     
     return order;

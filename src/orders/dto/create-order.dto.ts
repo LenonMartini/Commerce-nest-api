@@ -1,4 +1,4 @@
-import { OrdemItemDto } from "./order-item-dto";
+import { OrdemItemDto } from "./order-item.dto";
 
 export class CreateOrderDto {
     items: OrdemItemDto[];

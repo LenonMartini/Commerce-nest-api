@@ -1,6 +1,6 @@
 
 import { Product } from 'src/products/entities/product.entity';
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { OrderItem } from './order-item.entity';
 export enum OrderStatus{
     PENDING = 'pending',
@@ -8,7 +8,7 @@ export enum OrderStatus{
     FAILD = 'failed'
 }
 export type CreateOrderCommand = {
-    clint_id: number,
+    client_id: number,
     items: {
         product_id: string,
         quantity: number,
@@ -21,7 +21,7 @@ export class Order {
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
-    @Column({ type: 'decimal', precision: 10, scale: 2 })
+    @Column({ type: 'decimal', precision: 10, scale: 2, nullable: false })
     total: number;
 
     @Column()
@@ -33,23 +33,29 @@ export class Order {
     @CreateDateColumn()
     created_at: Date;
 
-    @OneToMany(() => OrderItem, (item) => item.order)
+    @OneToMany(() => OrderItem, (item) => item.order, { cascade: ['insert'] })
     items: OrderItem[];
 
     // Utilizado para calcular o total
     static create(input: CreateOrderCommand){
+
         const order = new Order();
-        order.client_id = input.clint_id;
+        order.client_id = input.client_id;
         order.items = input.items.map(item => {
             const orderItem = new OrderItem();
+
             orderItem.product_id = item.product_id;
             orderItem.quantity = item.quantity;
             orderItem.price = item.price;
+
             return orderItem;
         });
         order.total = order.items.reduce((sum, item) => {
-            return sum + item.price * item.quantity
+            return sum + item.price * item.quantity;
         }, 0);
+
+
+       
         return order;
     }
 }
